@@ -1,3 +1,13 @@
+# tokens and stuff
+/secrets
+
+# Where i keep my notes
+/Notes
+
+/logs
+last_time.pkl
+.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
