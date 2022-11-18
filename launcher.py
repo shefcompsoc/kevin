@@ -7,6 +7,10 @@ from datetime import datetime
 def rename_log():
     os.rename("logs/latest.txt", f"logs/{datetime.now().strftime('%d-%m-%Y %I-%M-%S-%p')}.txt")
 
+if os.name != 'nt':
+    import uvloop
+    uvloop.install()
+
 if __name__ == '__main__':
     """
     if os.path.exists("logs/latest.txt"):

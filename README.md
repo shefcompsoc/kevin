@@ -4,7 +4,17 @@ Adds a `/verify` command that takes in the users ticket reference and checks to 
 If the user already entered their Discord Tag when getting their ticket then they will be automatically verified and given the roles when joining the server (the theory...)
 
 **Python library dependencies:**
-* *hikari*
 * *hikari-lightbulb*
 * *mysql-connector-python*
 * *APScheduler*
+* *requests*
+
+**For Linux**
+* "hikari[speedups]"
+
+**For Windows**
+* *hikari*
+You must have VS C++ build tools installed
+
+**Other dependencies:**
+* *MySQL to store tito tickets and user info*
