@@ -15,9 +15,9 @@ from HackNottsVerification.bot import Bot
 server_info = {
     'server_id': 1023695785495363584,
     'verified': 1025399005477343323,
-    'attendee': 1025399116706095198,
-    'volunteer': 1025896388048977921,
-    'sponsor': 1026621003171897404
+    'Attendee': 1025399116706095198,
+    'Volunteer': 1025896388048977921,
+    'Sponsor': 1026621003171897404
 } # Role ID's
 
 def user_verify(user, ref):
@@ -70,7 +70,7 @@ def user_verify(user, ref):
             db_cursor.execute(sql)
             db.commit()
 
-            logging.info(f"User '{user}' has been verified with as '{ref}'")
+            logging.info(f"User '{user}' has been verified with reference '{ref}' as '{result[2]}'")
             message = f"You have been verified with ticket type: **{result[2]}** and have accompanying role assigned to you. Thank you!"
 
         except mysql.connector.errors.IntegrityError: # Probably a discord tag is in the database
