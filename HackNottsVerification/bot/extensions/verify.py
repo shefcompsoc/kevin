@@ -3,22 +3,24 @@ import re, hikari, lightbulb, logging, mysql.connector
 from HackNottsVerification.bot import Bot
 
 # HackNotts Server
-# server_info = {
-#     'server_id': 977197096094564453,
-#     'verified': 977223924213514290,
-#     'attendee': 977201041676324894,
-#     'volunteer': 977201147590897735,
-#     'sponsor': 977201009237565490
-# } # Role ID's
+server_info = {
+    'server_id': 977197096094564453,
+    'verified': 977223924213514290,
+    'Attendee': 977201041676324894,
+    'Hacker': 977201041676324894,
+    'Volunteer': 977201147590897735,
+    'Sponsor': 977201009237565490,
+    'Organiser': 977200927759032341
+} # Role ID's
 
 # Test Server
-server_info = {
-    'server_id': 1023695785495363584,
-    'verified': 1025399005477343323,
-    'Attendee': 1025399116706095198,
-    'Volunteer': 1025896388048977921,
-    'Sponsor': 1026621003171897404
-} # Role ID's
+# server_info = {
+#     'server_id': 1023695785495363584,
+#     'verified': 1025399005477343323,
+#     'Attendee': 1025399116706095198,
+#     'Volunteer': 1025896388048977921,
+#     'Sponsor': 1026621003171897404
+# } # Role ID's
 
 def user_verify(user, ref):
     ref = ref.upper()
@@ -122,7 +124,7 @@ def auto_verify(tag):
         db_cursor.execute(sql)
         db.commit()
 
-        logging.info(f"User: {tag} has been auto verified as '{result[2]}'")
+        logging.info(f"User: {tag} has been auto verified with ticket reference '{result[1]}' as '{result[2]}'")
         _type = str(result[2])
 
     db.close()
@@ -146,7 +148,7 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
             message = f"Hello! Thank you for joining the HackNotts '23 Discord server. It appears that your Discord tag is already verified on our database, this means you will not be able to send messages in the server. An organiser will be in contact shortly to resolve this issue :smile:"
             logging.warning(f"User: {event.user.username}#{event.member.discriminator} joined the server but was already verifed?")
         elif flag is False: # Autoverification worked
-            message = f"Hello! This is an automatic notification to say you have been verified on the HackNotts '23 Discord server. This is because you entered your Discord tag when assigning your ticket. Please have a look around and introduce yourself!"
+            message = f"Hello! This is an automatic notification to say you have been verified as **{ticket_type}** on the HackNotts '23 Discord server. This is because you entered your Discord tag when assigning your ticket. Please have a look around and introduce yourself!"
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info['verified'])   # adds verified role
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info[ticket_type])  # adds either volunteer or attendee role
         elif flag is None: # Just a join

@@ -11,13 +11,13 @@ class Bot(lightbulb.BotApp):
         self.scheduler = AsyncIOScheduler()
         self.scheduler.configure(timezone=utc)
 
-        with open("./secrets/discord", mode="r", encoding="utf-8") as f:
+        with open("./secrets/oar", mode="r", encoding="utf-8") as f:
             token = f.read().strip()
 
         super().__init__(
             token = token,
             #default_enabled_guilds=(1023695785495363584),
-            help_slash_command=True,
+            help_slash_command=False,
             intents = hikari.Intents.ALL # For debugging just use all cos why not
             #intents = hikari.Intents.GUILD_MEMBERS # For sending messages
         )
