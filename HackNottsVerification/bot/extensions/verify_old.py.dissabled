@@ -1,8 +1,8 @@
-import re, hikari, lightbulb, logging, mysql.connector
+import re, hikari, lightbulb, requests, json, pickle, logging, mysql.connector
 
 from HackNottsVerification.bot import Bot
+from datetime import datetime
 
-# HackNotts Server
 # server_info = {
 #     'server_id': 977197096094564453,
 #     'verified': 977223924213514290,
@@ -11,7 +11,6 @@ from HackNottsVerification.bot import Bot
 #     'sponsor': 977201009237565490
 # } # Role ID's
 
-# Test Server
 server_info = {
     'server_id': 1023695785495363584,
     'verified': 1025399005477343323,
@@ -19,6 +18,90 @@ server_info = {
     'volunteer': 1025896388048977921,
     'sponsor': 1026621003171897404
 } # Role ID's
+
+def update_ticket_data():
+    # SQL database info
+    with open("./secrets/tito", "r") as file: # reads the private file for the API Token
+        tito_token = file.read().strip()
+
+    with open("./secrets/sqlserver_pass", "r") as file:
+        sql_pass = file.read().strip()
+
+    with open("./secrets/sqlserver_user", "r") as file:
+        sql_user = file.read().strip()
+
+    try:
+        db = mysql.connector.connect(
+        host="localhost", # Can only access database from localhost
+        user=sql_user,
+        password=sql_pass,
+        database="HackNotts"
+        )
+        db_cursor = db.cursor()
+    except mysql.connector.errors.DatabaseError:
+        logging.warning("Cannot connect to database")
+        return None
+
+    # Tito data stuff
+    account_slug = "olivermalkin"
+    event_slug = "test"
+    question_slug = "what-is-your-discord-tag"
+
+    try:
+        with open("./HackNottsVerification/bot/extensions/last_time.pkl", "rb") as file:
+            last_time = pickle.load(file)
+    except FileNotFoundError:
+        last_time = None
+
+    with open("./HackNottsVerification/bot/extensions/last_time.pkl", "wb") as file:
+        pickle.dump(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S+UTC"), file=file) # Dumps the time stamp to a file
+
+    updates = 0 # Number of updates
+    page = 1
+    loop = True
+    while loop:
+        if last_time is None:
+            url = f'https://api.tito.io/v3/{account_slug}/{event_slug}/tickets?page[100]={page}&expand=responses,release&search[direction]=desc&search[states][]=complete'
+        else:
+            url = f'https://api.tito.io/v3/{account_slug}/{event_slug}/tickets?page[100]={page}&expand=responses,release&search[direction]=desc&search[states][]=complete&search[updated_at][gte]={last_time}'
+
+        header = {'Authorization': f'Token token={tito_token}', 'Accept': 'application/json'}
+        tito_data = json.loads(requests.get(url, headers=header).text)
+
+        number = len(tito_data['tickets'])
+        for ticket in range(number):
+            try:
+                discord_tag = tito_data['tickets'][ticket]['responses'][question_slug]
+            except KeyError:
+                discord_tag = None
+
+            ticket_ref  = tito_data['tickets'][ticket]['reference']
+            ticket_type = tito_data['tickets'][ticket]['release']['title'].lower()
+
+            if discord_tag is not None:
+                sql = f"INSERT INTO `People` (`DiscordTag`, `TicketRef`, `TicketType`) VALUES ('{discord_tag}', '{ticket_ref}', '{ticket_type}')"
+            else:
+                sql = f"INSERT INTO `People` (`TicketRef`, `TicketType`) VALUES ('{ticket_ref}', '{ticket_type}')"
+
+            try:
+                db_cursor.execute(sql)
+                db.commit()
+                updates += 1
+            except mysql.connector.errors.IntegrityError:
+                # Update discord tag
+                sql = f"UPDATE `People` SET `DiscordTag` = '{discord_tag}' WHERE `TicketRef` = '{ticket_ref}'"
+                db_cursor.execute(sql)
+                db.commit()
+
+        if tito_data['meta']['next_page'] is None:
+            loop = False
+        else:
+            page += 1
+
+    logging.info(f"Updates were triggered: {updates} updates pushed to the database. Time: {last_time}") # Adds a log
+    db.close()
+    return updates # How many tickets were there to update
+        
 
 def user_verify(user, ref):
     ref = ref.upper()
@@ -29,6 +112,7 @@ def user_verify(user, ref):
         sql_user = file.read().strip()
 
     try:
+
         db = mysql.connector.connect(
         host="localhost",
         user=sql_user,
@@ -133,6 +217,7 @@ plugin = lightbulb.Plugin("verify")
 @plugin.listener(hikari.MemberCreateEvent)
 async def on_join(event: hikari.MemberCreateEvent) -> None:
     if not event.member.is_bot and not event.member.is_system:
+        update_ticket_data()
         logging.info(f"User: {event.user.username}#{event.member.discriminator} joined the server")
         result = auto_verify(f"{event.user.username}#{event.member.discriminator}")
 
@@ -168,6 +253,7 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
 @lightbulb.implements(lightbulb.SlashCommand)
 async def verify_command(ctx: lightbulb.SlashContext) -> None:
     if re.search('^[-A-Za-z0-9]+$', ctx.options.ticket) is not None:
+        update_ticket_data() # Ensure database it up-to-date
         message = user_verify(ctx.author, ctx.options.ticket) # Returns the response and flag
 
         error = None
@@ -193,6 +279,21 @@ async def verify_command(ctx: lightbulb.SlashContext) -> None:
         await ctx.respond(message[0])
     else:
         await ctx.respond("The ticket can only contain letters, numbers and hyphens")
+
+@plugin.command
+@lightbulb.add_checks(lightbulb.owner_only)
+@lightbulb.command("update", "Manually syncs the database to ticket data if needed (do not spam)", auto_defer=True, ephemeral=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def update_command(ctx: lightbulb.SlashContext) -> None:
+    updates = update_ticket_data()
+    if updates is None:
+        await ctx.respond("Cannot reach mysql server!")
+    elif updates == 0:
+        await ctx.respond("There were zero updates")
+    elif updates == 1:
+        await ctx.respond("There was 1 update")
+    else:
+        await ctx.respond(f"There were {updates} updates")
 
 def load(bot: Bot) -> None:
     bot.add_plugin(plugin)

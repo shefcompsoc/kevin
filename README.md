@@ -8,9 +8,10 @@ If the user already entered their Discord Tag when getting their ticket then the
 * *mysql-connector-python*
 * *APScheduler*
 * *requests*
+* *flask* - This is for the Tito webhook listener
 
 **For Linux**
-* "hikari[speedups]"
+* *"hikari[speedups]"*
 
 **For Windows**
 * *hikari*
