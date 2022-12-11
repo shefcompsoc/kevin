@@ -16,10 +16,8 @@ class Bot(lightbulb.BotApp):
 
         super().__init__(
             token = token,
-            #default_enabled_guilds=(1023695785495363584),
             help_slash_command=False,
-            intents = hikari.Intents.ALL # For debugging just use all cos why not
-            #intents = hikari.Intents.GUILD_MEMBERS # For sending messages
+            intents = hikari.Intents.ALL
         )
 
     def run(self) -> None:
@@ -65,9 +63,9 @@ class Bot(lightbulb.BotApp):
             await me.send(event.exception)
 
     async def on_message(self, event:hikari.GuildMessageCreateEvent) -> None:
-        channel_id = (977229878850097203) # Tuple of channel ID's to be nuked
+        channel_id = 977229878850097203 # Channel ID's to be nuked
         try:
-            if event.channel_id in channel_id and event.author_id != 427401640061042689: # Is it not me? 
+            if event.channel_id == channel_id and event.author_id != 427401640061042689: # Is it not me?
                 logging.info(f"Deleted message in verify channel: '{event.message.content}'")
                 await self.rest.delete_message(channel_id, event.message_id) 
                 user = await self.rest.create_dm_channel(event.member.id)
