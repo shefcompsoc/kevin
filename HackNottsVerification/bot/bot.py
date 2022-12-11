@@ -65,7 +65,7 @@ class Bot(lightbulb.BotApp):
             await me.send(event.exception)
 
     async def on_message(self, event:hikari.GuildMessageCreateEvent) -> None:
-        channel_id = (1026601514921381889, 977229878850097203) # Tuple of channel ID's to be nuked
+        channel_id = (977229878850097203) # Tuple of channel ID's to be nuked
         try:
             if event.channel_id in channel_id and event.author_id != 427401640061042689: # Is it not me? 
                 logging.info(f"Deleted message in verify channel: '{event.message.content}'")
