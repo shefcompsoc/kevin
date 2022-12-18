@@ -61,7 +61,7 @@ def user_verify(user, ref):
         if str(result[1]) == str(user): # Verified is not 1 and tags match
             verif = True
         else:
-            message = f"There is a linked Discord Tag to this ticket reference '{ref}' which does not match yours. If you entered your Discord tag when assigning your ticket, double check that it has both the username and the discriminator e.g `JoeBloggs#1234`. If it does not match then you will not be able to verify yourself. You can update your information via the ticket confirmation email."
+            message = f"There is a linked Discord Tag to this ticket reference '**{ref}**' which does not match yours. If you entered your Discord tag when assigning your ticket, double check that it has both the username and the discriminator e.g `JoeBloggs#1234`. If it does not match then you will not be able to verify yourself. You can update your information via the ticket confirmation email."
             flag = 2
     elif result[1] is None: # There is no discord tag so must be verified
         verif = True

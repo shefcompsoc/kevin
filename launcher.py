@@ -9,7 +9,7 @@ if os.name != 'nt': # A better, faster version of asyncio for Linux
     uvloop.install()
 
 def rename_log():
-    os.rename("logs/latest.txt", f"logs/{datetime.now().strftime('%d-%m-%Y %I-%M-%S-%p')}.txt")
+    os.rename("logs/latest.txt", f"logs/{datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.txt")
 
 if __name__ == '__main__':
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         rename_log() # prevents overiding a log in the event of catastrophic failure
     elif not os.path.exists("logs/"):
         os.mkdir("logs/")
-    logging.basicConfig(filename="logs/latest.txt", encoding="utf-8", level=logging.INFO) # Open a logging file
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%d-%m-%Y %H:%M:%S', filename="logs/latest.txt", encoding="utf-8", level=logging.INFO) # Open a logging file
 
     bot = Bot()
     bot.run()

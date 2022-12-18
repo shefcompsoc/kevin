@@ -4,7 +4,9 @@ from flask import Flask, request, abort
 
 app = Flask(__name__)
 
-@app.route('/webhook', methods=['POST', 'GET'])
+# This is reversed proxied by nginx, this is NOT the public address
+# This is the interal address localhost:5000/hacknotts2023 in this case
+@app.route('/hacknotts2023', methods=['POST', 'GET'])
 def webhook():
     if request.method == 'POST':
 
