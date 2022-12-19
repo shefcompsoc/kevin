@@ -16,25 +16,8 @@ def webhook():
         else:
             abort(404)
 
-        with open("./secrets/sqlserver_pass", "r") as file:
-            sql_pass = file.read().strip()
-
-        with open("./secrets/sqlserver_user", "r") as file:
-            sql_user = file.read().strip()
-
         with open("./secrets/tito_key", "r") as file:
             tito_key = file.read().strip()
-
-        try:
-            db = mysql.connector.connect(
-            host="localhost",
-            user=sql_user,
-            password=sql_pass,
-            database="HackNotts"
-            )
-            db_cursor = db.cursor()
-        except mysql.connector.DatabaseError:
-            abort(404)
 
         # Verify the payload
         tito_key = tito_key.encode()
@@ -89,4 +72,21 @@ def webhook():
         abort(404)
 
 if __name__ == '__main__':
+    with open("./secrets/sqlserver_pass", "r") as file:
+        sql_pass = file.read().strip()
+
+    with open("./secrets/sqlserver_user", "r") as file:
+        sql_user = file.read().strip()
+
+    try:
+        db = mysql.connector.connect(
+        host="localhost",
+        user=sql_user,
+        password=sql_pass,
+        database="HackNotts"
+        )
+        db_cursor = db.cursor()
+    except mysql.connector.DatabaseError:
+        print("UNABLE TO CONNECT TO DATABASE")
     app.run()
+    db.close()

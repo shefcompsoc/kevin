@@ -1,6 +1,5 @@
 import logging, os
 
-from HackNottsVerification import __version__
 from HackNottsVerification.bot import Bot
 from datetime import datetime
 
