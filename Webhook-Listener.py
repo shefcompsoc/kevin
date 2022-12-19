@@ -15,7 +15,7 @@ def webhook():
             data = request.json
         else:
             abort(404)
-        
+
         with open("./secrets/sqlserver_pass", "r") as file:
             sql_pass = file.read().strip()
 

@@ -2,7 +2,6 @@ import logging, hikari, lightbulb
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
-from HackNottsVerification import __version__
 
 class Bot(lightbulb.BotApp):
     def __init__(self) -> None:
@@ -26,6 +25,9 @@ class Bot(lightbulb.BotApp):
         self.event_manager.subscribe(lightbulb.CommandErrorEvent, self.on_error)        # Global error handler uncomment for actual release
         self.event_manager.subscribe(hikari.GuildMessageCreateEvent, self.on_message)   # Whenever a message is sent
         self.event_manager.subscribe(hikari.MemberDeleteEvent, self.on_leave)
+
+        with open("./HackNottsVerification/version.txt", "r") as file:
+            __version__ = file.read().strip()
 
         super().run(
             activity=hikari.Activity(
