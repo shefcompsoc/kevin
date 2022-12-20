@@ -35,6 +35,7 @@ def webhook():
                 ticket_type = data['release_title'] # Ticket type attendee/volunteer/sponsor
 
                 if data['state_name'] == 'void': # If the ticket is voided then remove from database
+                    print(f"Deletec ticket reference: {ticket_ref}")
                     sql = f"DELETE FROM `People` WHERE `TicketRef` = '{ticket_ref}'"
                     db_cursor.execute(sql)
                     db.commit()
@@ -46,8 +47,10 @@ def webhook():
                         discord_tag = None
 
                     if discord_tag is None:
+                        print(f"Added ticket reference: {ticket_ref}")
                         sql = f"INSERT INTO `People` (`TicketRef`, `TicketType`) VALUES ('{ticket_ref}', '{ticket_type}')"
                     else:
+                        print(f"Added ticket reference: {ticket_ref}")
                         sql = f"INSERT INTO `People` (`DiscordTag`, `TicketRef`, `TicketType`) VALUES ('{discord_tag}', '{ticket_ref}', '{ticket_type}')"
 
                     try:
@@ -56,9 +59,11 @@ def webhook():
                     except mysql.connector.errors.IntegrityError:
                         try:
                             if discord_tag is None:
+                                print(f"Updated ticket reference: {ticket_ref}")
                                 sql = f"UPDATE `People` SET `DiscordTag` = NULL WHERE `TicketRef` = '{ticket_ref}'"
                             else:
                                 # Update discord tag
+                                print(f"Updated ticket reference: {ticket_ref}")
                                 sql = f"UPDATE `People` SET `DiscordTag` = '{discord_tag}' WHERE `TicketRef` = '{ticket_ref}'"
                             db_cursor.execute(sql)
                             db.commit()
@@ -89,4 +94,5 @@ if __name__ == '__main__':
     except mysql.connector.DatabaseError:
         print("UNABLE TO CONNECT TO DATABASE")
     app.run()
+    print("App closing down")
     db.close()

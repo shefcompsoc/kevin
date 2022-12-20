@@ -140,7 +140,7 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
             await user.send(message)
         elif result[0] is None:
             me = await event.app.rest.create_dm_channel(427401640061042689)
-            me.send("The MySQL server is down")
+            await me.send("The MySQL server is down")
     else:
         logging.info(f"Bot: {event.user.username}#{event.member.discriminator} joined the server")
 
