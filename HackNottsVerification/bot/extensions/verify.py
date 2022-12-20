@@ -22,26 +22,27 @@ server_info = {
 #     'Sponsor': 1026621003171897404
 # } # Role ID's
 
-with open("./secrets/sqlserver_pass", "r") as file:
-    sql_pass = file.read().strip()
-
-with open("./secrets/sqlserver_user", "r") as file:
-    sql_user = file.read().strip()
-
-try:
-    db = mysql.connector.connect(
-    host="localhost",
-    user=sql_user,
-    password=sql_pass,
-    database="HackNotts"
-    )
-
-    db_cursor = db.cursor()
-except mysql.connector.DatabaseError:
-    pass
-
 def user_verify(user, ref):
     ref = ref.upper()
+
+    with open("./secrets/sqlserver_pass", "r") as file:
+        sql_pass = file.read().strip()
+
+    with open("./secrets/sqlserver_user", "r") as file:
+        sql_user = file.read().strip()
+
+    try:
+        db = mysql.connector.connect(
+        host="localhost",
+        user=sql_user,
+        password=sql_pass,
+        database="HackNotts"
+        )
+
+        db_cursor = db.cursor()
+    except mysql.connector.DatabaseError:
+        pass
+
     sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = '{ref.upper()}'"
     db_cursor.execute(sql)
     try:
@@ -80,12 +81,31 @@ def user_verify(user, ref):
             message = f"Your Discord tag is already assigned to a ticket reference. A message has been sent to an organiser and will be with you to resolve this issue"
             flag = 3
 
+    db.close()
     try:
         return (message, flag, str(result[2])) # Message is the text that the person will see as an ephemeral
     except TypeError:
         return(message, flag, None)
 
 def auto_verify(tag):
+    with open("./secrets/sqlserver_pass", "r") as file:
+        sql_pass = file.read().strip()
+
+    with open("./secrets/sqlserver_user", "r") as file:
+        sql_user = file.read().strip()
+
+    try:
+        db = mysql.connector.connect(
+        host="localhost",
+        user=sql_user,
+        password=sql_pass,
+        database="HackNotts"
+        )
+
+        db_cursor = db.cursor()
+    except mysql.connector.DatabaseError:
+        pass
+
     sql = f"SELECT `ID`, `TicketRef`, `TicketType`, `Verified` FROM `People` WHERE `DiscordTag` = '{tag}'"
     db_cursor.execute(sql)
     try:
@@ -109,7 +129,9 @@ def auto_verify(tag):
         logging.info(f"User: {tag} has been auto verified with ticket reference '{result[1]}' as '{result[2]}'")
         _type = str(result[2])
 
+    db.close()
     return (flag, _id, _type) # Is the person already verified?
+
 
 plugin = lightbulb.Plugin("verify")
 
@@ -181,5 +203,4 @@ def load(bot: Bot) -> None:
     bot.add_plugin(plugin)
 
 def unload(bot: Bot) -> None:
-    db.close()
     bot.remove_plugin("verify")
