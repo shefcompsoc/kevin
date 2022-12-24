@@ -74,7 +74,7 @@ def user_verify(user, ref):
             db_cursor.execute(sql)
             db.commit()
 
-            logging.info(f"User '{user}' has been verified with reference '{ref}' as '{result[2]}'")
+            logging.info(f"User '{user}' has been manually verified with reference '{ref}' as '{result[2]}'")
             message = f"You have been verified with ticket type: **{result[2]}** and have accompanying role assigned to you. Thank you!"
 
         except mysql.connector.errors.IntegrityError: # Probably a discord tag is in the database
@@ -162,7 +162,7 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
             await user.send(message)
         elif result[0] is None:
             me = await event.app.rest.create_dm_channel(427401640061042689)
-            await me.send("The MySQL server is down")
+            await me.send("Auto verify: The MySQL server is down")
     else:
         logging.info(f"Bot: {event.user.username}#{event.member.discriminator} joined the server")
 
@@ -177,7 +177,7 @@ async def verify_command(ctx: lightbulb.SlashContext) -> None:
 
         error = None
         if message is None:
-            error = "The MySQL server is down"
+            error = "Manual verify: The MySQL server is down"
             message = ("An internal error has occured. Please try again in a few minutes", None)
         elif message[1] == 1: # The verified flag is true
             error = f"The user <@{ctx.author.id}> tried verifying with ticket reference '{ctx.options.ticket.upper()}' but it is already verified"
