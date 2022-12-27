@@ -64,10 +64,10 @@ def webhook():
 
                     if discord_tag is None:
                         print(f"Added ticket reference: {ticket_ref}")
-                        sql = f"INSERT INTO `People` (`TicketRef`, `TicketType`) VALUES ('{ticket_ref}', '{ticket_type}')"
+                        sql = f"INSERT INTO `People` (`TicketRef`, `TicketType`) VALUES (\"{ticket_ref}\", \"{ticket_type}\")"
                     else:
                         print(f"Added ticket reference: {ticket_ref}")
-                        sql = f"INSERT INTO `People` (`DiscordTag`, `TicketRef`, `TicketType`) VALUES ('{discord_tag}', '{ticket_ref}', '{ticket_type}')"
+                        sql = f"INSERT INTO `People` (`DiscordTag`, `TicketRef`, `TicketType`) VALUES (\"{discord_tag}\", \"{ticket_ref}\", \"{ticket_type}\")"
 
                     try:
                         db_cursor.execute(sql)
@@ -76,11 +76,11 @@ def webhook():
                         try:
                             if discord_tag is None:
                                 print(f"Updated ticket reference: {ticket_ref}")
-                                sql = f"UPDATE `People` SET `DiscordTag` = NULL WHERE `TicketRef` = '{ticket_ref}'"
+                                sql = f"UPDATE `People` SET `DiscordTag` = NULL WHERE `TicketRef` = \"{ticket_ref}'"
                             else:
                                 # Update discord tag
                                 print(f"Updated ticket reference: {ticket_ref}")
-                                sql = f"UPDATE `People` SET `DiscordTag` = '{discord_tag}' WHERE `TicketRef` = '{ticket_ref}'"
+                                sql = f"UPDATE `People` SET `DiscordTag` = \"{discord_tag}\" WHERE `TicketRef` = \"{ticket_ref}\""
                             db_cursor.execute(sql)
                             db.commit()
                         except mysql.connector.errors.IntegrityError:

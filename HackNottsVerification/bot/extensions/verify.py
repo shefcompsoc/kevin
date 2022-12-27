@@ -43,7 +43,7 @@ def user_verify(user, ref):
     except mysql.connector.DatabaseError:
         pass
 
-    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = '{ref.upper()}'"
+    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = \"{ref.upper()}\""
     db_cursor.execute(sql)
     try:
         result = db_cursor.fetchall()[0]
@@ -70,7 +70,7 @@ def user_verify(user, ref):
 
     if verif is True: # Verify user and update record
         try:
-            sql = f"UPDATE `People` SET `Verified` = 1, `DiscordTag` = '{user}' WHERE `ID` = {result[0]}" # Set user to be verified and set their tag
+            sql = f"UPDATE `People` SET `Verified` = 1, `DiscordTag` = \"{user}\" WHERE `ID` = {result[0]}" # Set user to be verified and set their tag
             db_cursor.execute(sql)
             db.commit()
 
@@ -106,7 +106,7 @@ def auto_verify(tag):
     except mysql.connector.DatabaseError:
         pass
 
-    sql = f"SELECT `ID`, `TicketRef`, `TicketType`, `Verified` FROM `People` WHERE `DiscordTag` = '{tag}'"
+    sql = f"SELECT `ID`, `TicketRef`, `TicketType`, `Verified` FROM `People` WHERE `DiscordTag` = \"{tag}\""
     db_cursor.execute(sql)
     try:
         result = db_cursor.fetchall()[0]
@@ -121,7 +121,7 @@ def auto_verify(tag):
     elif result[3] == 1:
         flag = True
     else:
-        sql = f"UPDATE `People` SET `Verified` = 1, `DiscordTag` = '{tag}' WHERE `ID` = {result[0]}" # Set user to be verified and set their tag
+        sql = f"UPDATE `People` SET `Verified` = 1, `DiscordTag` = \"{tag}\" WHERE `ID` = {result[0]}" # Set user to be verified and set their tag
         _id = result[0]
         db_cursor.execute(sql)
         db.commit()
