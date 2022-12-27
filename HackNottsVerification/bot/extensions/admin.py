@@ -9,7 +9,7 @@ plugin = lightbulb.Plugin("Admin", default_enabled_guilds=977197096094564453)
 @lightbulb.option("plugin", "The name of the extension to be removed", required=True)
 @lightbulb.command("disable", "Disable an extention", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
-async def admin_only(ctx: lightbulb.SlashContext) -> None:
+async def disable(ctx: lightbulb.SlashContext) -> None:
     try:
         plugin.bot.unload_extensions(f"HackNottsVerification.bot.extensions.{ctx.options.plugin}")
         await plugin.bot.sync_application_commands()
@@ -24,7 +24,7 @@ async def admin_only(ctx: lightbulb.SlashContext) -> None:
 @lightbulb.option("plugin", "The name of the extension to be enabled", required=True)
 @lightbulb.command("enable", "Enable an extension", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
-async def admin_only(ctx: lightbulb.SlashContext) -> None:
+async def enable(ctx: lightbulb.SlashContext) -> None:
     try:
         plugin.bot.load_extensions(f"HackNottsVerification.bot.extensions.{ctx.options.plugin}")
         await plugin.bot.sync_application_commands()
@@ -39,7 +39,7 @@ async def admin_only(ctx: lightbulb.SlashContext) -> None:
 @lightbulb.option("plugin", "The name of the extension to be enabled", required=True)
 @lightbulb.command("reload", "Reload an extension", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
-async def admin_only(ctx: lightbulb.SlashContext) -> None:
+async def reload(ctx: lightbulb.SlashContext) -> None:
     try:
         try:
             plugin.bot.unload_extensions(f"HackNottsVerification.bot.extensions.{ctx.options.plugin}")
@@ -61,7 +61,7 @@ async def admin_only(ctx: lightbulb.SlashContext) -> None:
 @lightbulb.option("status", "Can be 'Online', 'Invisible', 'DND' or 'Idle'", required=False)
 @lightbulb.command("update_presence", "Update the presence of the bot", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
-async def admin_only(ctx: lightbulb.SlashContext) -> None:
+async def update_presence(ctx: lightbulb.SlashContext) -> None:
     with open("./HackNottsVerification/version.txt", "r") as file:
             __version__ = file.read().strip()
 
@@ -109,7 +109,7 @@ async def admin_only(ctx: lightbulb.SlashContext) -> None:
 @lightbulb.app_command_permissions(hikari.Permissions.ADMINISTRATOR)
 @lightbulb.command("showall", "Show all extensions", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
-async def admin_only(ctx: lightbulb.SlashContext) -> None:
+async def showall(ctx: lightbulb.SlashContext) -> None:
     raw = plugin.bot.extensions
     plugins = []
     for i in range(len(raw)):

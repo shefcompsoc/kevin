@@ -55,11 +55,7 @@ class Bot(lightbulb.BotApp):
 
     async def on_error(self, event:lightbulb.CommandErrorEvent) -> None:
         logging.warning(f"{event.context.author} tried using the command \"{event.context.command.name}\" with error \"{event.exception}\"")
-        await event.context.respond(f"Error moment: {event.exception}", flags=hikari.MessageFlag.EPHEMERAL)
-
-        if str(event.exception) != "You are not the owner of this bot":
-            me = await self.rest.create_dm_channel(427401640061042689)
-            await me.send(event.exception)
+        await event.context.respond(f"Oops there was an error with this command!", flags=hikari.MessageFlag.EPHEMERAL)        
 
     async def on_message(self, event:hikari.GuildMessageCreateEvent) -> None:
         channel_id = 977229878850097203 # Channel ID's to be nuked

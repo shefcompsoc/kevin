@@ -43,7 +43,7 @@ def user_verify(user, ref):
     except mysql.connector.DatabaseError:
         pass
 
-    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = \"{ref.upper()}\""
+    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = {ref.upper()}"
     db_cursor.execute(sql)
     try:
         result = db_cursor.fetchall()[0]
@@ -53,17 +53,17 @@ def user_verify(user, ref):
     flag = 0 # Have they tried using someone elses code
     verif = False
     if result is None: # There was no reference found
-        message = f"The ticket reference '**{ref}**' does not seem to be in our database. Please check you have entered it correctly. It should be 6 characters ***including*** the hyphen"
+        message = f"The ticket reference \'**{ref}**\' does not seem to be in our database. Please check you have entered it correctly. It should be 6 characters ***including*** the hyphen"
     elif result[3] == 1 and str(result[1]) == str(user): # The verified tag is 1 and the discord tags match
         message = f"You are already verified!"
     elif result[3] == 1: # Verified is 1 but discord tags dont match
-        message = f"It appears that the ticket with reference '**{ref}**' is already registered with a user. A message has been automatically sent to an organiser who will contact you shortly to resolve this issue"
+        message = f"It appears that the ticket with reference \'**{ref}**\' is already registered with a user. A message has been automatically sent to an organiser who will contact you shortly to resolve this issue"
         flag = 1
     elif result[1] is not None: # There is something in the discord tag
         if str(result[1]) == str(user): # Verified is not 1 and tags match
             verif = True
         else:
-            message = f"There is a linked Discord Tag to this ticket reference '**{ref}**' which does not match yours. If you entered your Discord tag when assigning your ticket, double check that it has both the username and the discriminator e.g `JoeBloggs#1234`. If it does not match then you will not be able to verify yourself. You can update your information via the ticket confirmation email."
+            message = f"There is a linked Discord Tag to this ticket reference \'**{ref}**\' which does not match yours. If you entered your Discord tag when assigning your ticket, double check that it has both the username and the discriminator e.g `JoeBloggs#1234`. If it does not match then you will not be able to verify yourself. You can update your information via the ticket confirmation email."
             flag = 2
     elif result[1] is None: # There is no discord tag so must be verified
         verif = True
@@ -74,7 +74,7 @@ def user_verify(user, ref):
             db_cursor.execute(sql)
             db.commit()
 
-            logging.info(f"User '{user}' has been manually verified with reference '{ref}' as '{result[2]}'")
+            logging.info(f"User '{user}' has been manually verified with reference \'{ref}\' as '{result[2]}'")
             message = f"You have been verified with ticket type: **{result[2]}** and have accompanying role assigned to you. Thank you!"
 
         except mysql.connector.errors.IntegrityError: # Probably a discord tag is in the database
@@ -139,7 +139,7 @@ plugin = lightbulb.Plugin("verify")
 async def on_join(event: hikari.MemberCreateEvent) -> None:
     if not event.member.is_bot and not event.member.is_system:
         logging.info(f"User: {event.user.username}#{event.member.discriminator} joined the server")
-        result = auto_verify(f"{event.user.username}#{event.member.discriminator}")
+        result = auto_verify(f"{str(event.user.username)}#{str(event.member.discriminator)}")
 
         flag = result[0]
         ticket_type = result[2]
