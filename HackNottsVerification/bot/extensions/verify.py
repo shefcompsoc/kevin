@@ -158,8 +158,11 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
             pass
 
         if flag is not None:
-            user = await event.app.rest.create_dm_channel(event.user_id)
-            await user.send(message)
+            try:
+                user = await event.app.rest.create_dm_channel(event.user_id)
+                await user.send(message)
+            except hikari.ForbiddenError:
+                logging.info(f"Unable to send welcome message to user {event.user.username}#{event.member.discriminator}")
         elif result[0] is None:
             me = await event.app.rest.create_dm_channel(427401640061042689)
             await me.send("Auto verify: The MySQL server is down")
