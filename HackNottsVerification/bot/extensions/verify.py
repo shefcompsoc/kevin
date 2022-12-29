@@ -155,7 +155,7 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info['verified'])   # adds verified role
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info[ticket_type])  # adds either volunteer or attendee role
         elif flag is None: # Just a join
-            pass
+            return
 
         if flag is not None:
             try:
