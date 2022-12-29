@@ -43,7 +43,7 @@ def user_verify(user, ref):
     except mysql.connector.DatabaseError:
         pass
 
-    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = {ref.upper()}"
+    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = '{ref.upper()}'"
     db_cursor.execute(sql)
     try:
         result = db_cursor.fetchall()[0]

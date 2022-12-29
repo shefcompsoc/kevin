@@ -22,7 +22,7 @@ class Bot(lightbulb.BotApp):
         self.event_manager.subscribe(hikari.StartedEvent, self.on_started)              # When the bot started
         self.event_manager.subscribe(hikari.StoppingEvent, self.on_stopping)            # When the bot is stopping
         self.event_manager.subscribe(hikari.StoppedEvent, self.on_stopped)              # When the bot stopped
-        self.event_manager.subscribe(lightbulb.CommandErrorEvent, self.on_error)        # Global error handler uncomment for actual release
+        #self.event_manager.subscribe(lightbulb.CommandErrorEvent, self.on_error)        # Global error handler uncomment for actual release
         self.event_manager.subscribe(hikari.GuildMessageCreateEvent, self.on_message)   # Whenever a message is sent
         self.event_manager.subscribe(hikari.MemberDeleteEvent, self.on_leave)
 
