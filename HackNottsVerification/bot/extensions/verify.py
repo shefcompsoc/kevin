@@ -22,7 +22,7 @@ server_info = {
 #     'Sponsor': 1026621003171897404
 # } # Role ID's
 
-def user_verify(user, ref):
+def user_verify(user, ref: str):
     ref = ref.upper()
 
     with open("./secrets/sqlserver_pass", "r") as file:
@@ -43,8 +43,8 @@ def user_verify(user, ref):
     except mysql.connector.DatabaseError:
         pass
 
-    sql = f"SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = '{ref.upper()}'"
-    db_cursor.execute(sql)
+    sql = "SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = %s"
+    db_cursor.execute(sql, (ref,))
     try:
         result = db_cursor.fetchall()[0]
     except IndexError:
@@ -70,8 +70,8 @@ def user_verify(user, ref):
 
     if verif is True: # Verify user and update record
         try:
-            sql = f"UPDATE `People` SET `Verified` = 1, `DiscordTag` = \"{user}\" WHERE `ID` = {result[0]}" # Set user to be verified and set their tag
-            db_cursor.execute(sql)
+            sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s WHERE `ID` = %s" # Set user to be verified and set their tag
+            db_cursor.execute(sql, (f"{user.username}#{user.discriminator}", result[0]))
             db.commit()
 
             logging.info(f"User '{user}' has been manually verified with reference \'{ref}\' as '{result[2]}'")
@@ -106,8 +106,8 @@ def auto_verify(tag):
     except mysql.connector.DatabaseError:
         pass
 
-    sql = f"SELECT `ID`, `TicketRef`, `TicketType`, `Verified` FROM `People` WHERE `DiscordTag` = \"{tag}\""
-    db_cursor.execute(sql)
+    sql = "SELECT `ID`, `TicketRef`, `TicketType`, `Verified` FROM `People` WHERE `DiscordTag` = %s"
+    db_cursor.execute(sql, (tag,))
     try:
         result = db_cursor.fetchall()[0]
     except IndexError:
@@ -121,9 +121,9 @@ def auto_verify(tag):
     elif result[3] == 1:
         flag = True
     else:
-        sql = f"UPDATE `People` SET `Verified` = 1, `DiscordTag` = \"{tag}\" WHERE `ID` = {result[0]}" # Set user to be verified and set their tag
         _id = result[0]
-        db_cursor.execute(sql)
+        sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s WHERE `ID` = %s" # Set user to be verified and set their tag
+        db_cursor.execute(sql, (tag, _id))
         db.commit()
 
         logging.info(f"User: {tag} has been auto verified with ticket reference '{result[1]}' as '{result[2]}'")
@@ -201,6 +201,15 @@ async def verify_command(ctx: lightbulb.SlashContext) -> None:
         await ctx.respond(message[0])
     else:
         await ctx.respond("The ticket can only contain letters, numbers and hyphens")
+
+@plugin.command
+@lightbulb.app_command_permissions(hikari.Permissions.ADMINISTRATOR)
+@lightbulb.option("tag", "The name of the extension to be enabled", required=True)
+@lightbulb.command("verify_user", "Autoverify a user", auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def verify_user(ctx: lightbulb.SlashContext) -> None:
+    result = auto_verify(ctx.options.tag)
+    await ctx.respond(result)
 
 def load(bot: Bot) -> None:
     bot.add_plugin(plugin)

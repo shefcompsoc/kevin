@@ -51,9 +51,8 @@ def webhook():
                 ticket_type = data['release_title'] # Ticket type attendee/volunteer/sponsor
 
                 if data['state_name'] == 'void': # If the ticket is voided then remove from database
-                    print(f"Deletec ticket reference: {ticket_ref}")
-                    sql = f"DELETE FROM `People` WHERE `TicketRef` = '{ticket_ref}'"
-                    db_cursor.execute(sql)
+                    sql = "DELETE FROM `People` WHERE `TicketRef` = %s"
+                    db_cursor.execute(sql, (ticket_ref,))
                     db.commit()
 
                 else:
@@ -63,25 +62,25 @@ def webhook():
                         discord_tag = None
 
                     if discord_tag is None:
-                        print(f"Added ticket reference: {ticket_ref}")
-                        sql = f"INSERT INTO `People` (`TicketRef`, `TicketType`) VALUES (\"{ticket_ref}\", \"{ticket_type}\")"
+                        sql = "INSERT INTO `People` (`TicketRef`, `TicketType`) VALUES (%s, %s)"
+                        values = (ticket_ref, ticket_type)
                     else:
-                        print(f"Added ticket reference: {ticket_ref}")
-                        sql = f"INSERT INTO `People` (`DiscordTag`, `TicketRef`, `TicketType`) VALUES (\"{discord_tag}\", \"{ticket_ref}\", \"{ticket_type}\")"
+                        sql = "INSERT INTO `People` (`DiscordTag`, `TicketRef`, `TicketType`) VALUES (%s, %s, %s)"
+                        values = (discord_tag, ticket_ref, ticket_type)
 
                     try:
-                        db_cursor.execute(sql)
+                        db_cursor.execute(sql, values)
                         db.commit()
-                    except mysql.connector.errors.IntegrityError:
+                    except mysql.connector.errors.IntegrityError: # Ticket has been transfered or tag updated
                         try:
                             if discord_tag is None:
-                                print(f"Updated ticket reference: {ticket_ref}")
-                                sql = f"UPDATE `People` SET `DiscordTag` = NULL WHERE `TicketRef` = \"{ticket_ref}'"
+                                sql = "UPDATE `People` SET `DiscordTag` = %s WHERE `TicketRef` = %s"
+                                values = (None, ticket_ref)
                             else:
                                 # Update discord tag
-                                print(f"Updated ticket reference: {ticket_ref}")
-                                sql = f"UPDATE `People` SET `DiscordTag` = \"{discord_tag}\" WHERE `TicketRef` = \"{ticket_ref}\""
-                            db_cursor.execute(sql)
+                                sql = "UPDATE `People` SET `DiscordTag` = %s WHERE `TicketRef` = %s"
+                                values = (discord_tag, ticket_ref)
+                            db_cursor.execute(sql, values)
                             db.commit()
                         except mysql.connector.errors.IntegrityError:
                             pass
