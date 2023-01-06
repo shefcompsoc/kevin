@@ -11,7 +11,7 @@ scheduler = AsyncIOScheduler() # Has to be async for the bot
 scheduler.configure(timezone=timezone.utc)
 scheduler.start()
 
-async def post_event(id: str, channel_id: int = 977199452404215859, preview: bool = False):
+async def post_event(id: str, channel_id: int = 1012817046599385179, preview: bool = False):
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -144,7 +144,7 @@ def flush():
 @lightbulb.option("author_url", "The url for the organiser", required=False)
 @lightbulb.option("location", "Location of the event", required=False)
 @lightbulb.option("delta", "The number of minuets to make the announcement before the start time", required=False)
-@lightbulb.option("url", "The url for the event, default is the HackNotts schedual page", required=False)
+@lightbulb.option("url", "The url for the event, default is the HackNotts schedule page", required=False)
 @lightbulb.option("colour", "The hex colour for the embed, default is HackNotts green '1BBB4F'", required=False)
 @lightbulb.command("new_event", "Creates a new scheduled event embed", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
