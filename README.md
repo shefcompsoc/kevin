@@ -17,7 +17,9 @@ It also is capable of automatically announcing scheduled events. There are sever
 * url - The url for the event, default is the HackNotts schedule page
 * colour - The hex colour for the embed, default is HackNotts green '1BBB4F'
 
-### Dependencies
+An announcement will be made as an embed tagging the relevant roles, all data is stored in a MySQL database.
+
+## Dependencies
 **Python library dependencies:**
 * *hikari-lightbulb*
 * *mysql-connector-python*

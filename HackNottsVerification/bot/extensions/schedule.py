@@ -11,7 +11,7 @@ scheduler = AsyncIOScheduler() # Has to be async for the bot
 scheduler.configure(timezone=timezone.utc)
 scheduler.start()
 
-async def post_event(id: str, channel_id: int = 1012817046599385179, preview: bool = False):
+async def post_event(id: str, channel_id: int = 977199452404215859, preview: bool = False):
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
