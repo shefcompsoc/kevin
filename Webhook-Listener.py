@@ -83,7 +83,7 @@ def webhook():
                             db_cursor.execute(sql, values)
                             db.commit()
                         except mysql.connector.errors.IntegrityError:
-                            pass
+                            pass # Not a lot can be done ngl
 
             return 'success', 200
         else:
