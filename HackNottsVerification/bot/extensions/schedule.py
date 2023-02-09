@@ -5,13 +5,13 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta, timezone
 
 plugin = lightbulb.Plugin("schedule", default_enabled_guilds=977197096094564453)
- 
+
 # Scheduler set up, timezone is UTC
 scheduler = AsyncIOScheduler() # Has to be async for the bot
 scheduler.configure(timezone=timezone.utc)
 scheduler.start()
 
-async def post_event(id: str, channel_id: int = 977199452404215859, preview: bool = False):
+async def post_event(id: str, channel_id: int = 977199452404215859, preview: bool = False) -> bool:
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -67,12 +67,12 @@ async def post_event(id: str, channel_id: int = 977199452404215859, preview: boo
         db.commit()
         # Ping everone outside of the embed, you cannot ping roles inside of the embed!
         await plugin.bot.rest.create_message(channel=channel_id, content="<@&977201041676324894> <@&977201147590897735>", mentions_everyone=True, user_mentions=True, role_mentions=True)
+
     await plugin.bot.rest.create_message(channel=channel_id, embed=embed)
     db.close()
-
     return True # Eveything worked fine
 
-def database_interaction(event, mode="insert", old_name=None):
+def database_interaction(event, mode="insert", old_name=None) -> bool:
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -106,7 +106,7 @@ def database_interaction(event, mode="insert", old_name=None):
     except mysql.connector.errors.IntegrityError:
         return False
 
-def flush():
+def flush() -> list:
     scheduler.remove_all_jobs() # Removes all jobs from the scheduler
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
@@ -120,7 +120,6 @@ def flush():
         password=sql_pass,
         database="HackNotts"
     )
-
     db_cursor = db.cursor(dictionary=True)
     sql = "SELECT `Name`, `Delta` FROM `Schedule` WHERE `EventPassed` = 0"
     db_cursor.execute(sql)
@@ -334,7 +333,7 @@ async def list_active(ctx: lightbulb.SlashContext) -> None:
 async def list_past(ctx: lightbulb.SlashContext) -> None:
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
-
+        
     with open("./secrets/sqlserver_user", "r") as file:
         sql_user = file.read().strip()
 
@@ -398,6 +397,7 @@ async def delete(ctx: lightbulb.SlashContext) -> None:
     if db_cursor.rowcount == 0:
         await ctx.respond(f"No event found with name **{ctx.options.name}**")
     else:
+        scheduler.remove_job(ctx.options.name)
         await ctx.respond(f"Event **{ctx.options.name}** has been deleted")
 
 @plugin.command

@@ -11,7 +11,6 @@ def rename_log():
     os.rename("logs/latest.txt", f"logs/{datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.txt")
 
 if __name__ == '__main__':
-
     if os.path.exists("logs/latest.txt"):
         rename_log() # prevents overiding a log in the event of catastrophic failure
     elif not os.path.exists("logs/"):
