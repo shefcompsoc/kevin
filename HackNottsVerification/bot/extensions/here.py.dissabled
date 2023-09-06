@@ -1,8 +1,8 @@
-import hikari, lightbulb, re, mysql.connector
+import hikari, lightbulb, mysql.connector
 
 from HackNottsVerification.bot import Bot
 
-plugin = lightbulb.Plugin("here", default_enabled_guilds=977197096094564453)
+plugin = lightbulb.Plugin("here", default_enabled_guilds=1147945134831440082)
 
 @plugin.command
 @lightbulb.command("here", "Use this to get the 'I was here' role!", auto_defer = True, ephemeral = True)
@@ -24,7 +24,11 @@ async def here(ctx: lightbulb.SlashContext):
     db_cursor = db.cursor(dictionary=True)
     sql = "SELECT * FROM `People` WHERE `DiscordTag` = %s"
     db_cursor.execute(sql, (f"{ctx.user.username}#{ctx.user.discriminator}",))
-    result: dict = db_cursor.fetchall()[0]
+    try:
+        result: dict = db_cursor.fetchall()[0]
+    except IndexError:
+        await ctx.respond("You are not in the database")
+        return
     db.close()
 
     if result['CheckedIn'] == 0:

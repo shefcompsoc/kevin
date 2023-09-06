@@ -4,14 +4,14 @@ from HackNottsVerification.bot import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta, timezone
 
-plugin = lightbulb.Plugin("schedule", default_enabled_guilds=977197096094564453)
+plugin = lightbulb.Plugin("schedule", default_enabled_guilds=1147945134831440082)
 
-# Scheduler set up, timezone is UTC
+# Scheduler set up, timezone is London
 scheduler = AsyncIOScheduler() # Has to be async for the bot
 scheduler.configure(timezone=timezone.utc)
 scheduler.start()
 
-async def post_event(id: str, channel_id: int = 977199452404215859, preview: bool = False) -> bool:
+async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bool = False) -> bool:
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -22,7 +22,7 @@ async def post_event(id: str, channel_id: int = 977199452404215859, preview: boo
     host="localhost",
     user=sql_user,
     password=sql_pass,
-    database="HackNotts"
+    database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -41,7 +41,7 @@ async def post_event(id: str, channel_id: int = 977199452404215859, preview: boo
         url = result['URL']
 
     if result['Colour'] is None:
-        colour = "1BBB4F" # Default colour if none is given, hacknotts green
+        colour = "F5F5DC" # Default colour if none is given, hacknotts green
     else:
         colour = result['Colour']
 
@@ -58,7 +58,7 @@ async def post_event(id: str, channel_id: int = 977199452404215859, preview: boo
         embed.set_author(name=result['Author'], url=result['AuthorURL'])
 
     embed.add_field(name="Description", value=result['Description'])
-    embed.set_footer(text="HackNotts 2023")
+    embed.set_footer(text="HackNotts 2023.5")
 
     if not preview:
         # Set EventPassed to 1 to show the event has been posted
@@ -66,7 +66,7 @@ async def post_event(id: str, channel_id: int = 977199452404215859, preview: boo
         db_cursor.execute(sql, (id,))
         db.commit()
         # Ping everone outside of the embed, you cannot ping roles inside of the embed!
-        await plugin.bot.rest.create_message(channel=channel_id, content="<@&977201041676324894> <@&977201147590897735>", mentions_everyone=True, user_mentions=True, role_mentions=True)
+        await plugin.bot.rest.create_message(channel=channel_id, content="<@&1147945134831440085> <@&1147945134831440088>", mentions_everyone=True, user_mentions=True, role_mentions=True)
 
     await plugin.bot.rest.create_message(channel=channel_id, embed=embed)
     db.close()
@@ -83,7 +83,7 @@ def database_interaction(event, mode="insert", old_name=None) -> bool:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts"
+        database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -118,7 +118,7 @@ def flush() -> list:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts"
+        database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
     sql = "SELECT `Name`, `Delta` FROM `Schedule` WHERE `EventPassed` = 0"
@@ -132,19 +132,19 @@ def flush() -> list:
         i += 1
 
     db.close()
-    return jobs # A list of jobs with datetimes x) <event name> TBA @ <datetime>
+    return jobs # A list of jobs with datetimes in the form: i) <event name> TBA @ <datetime>
 
 @plugin.command
 @lightbulb.app_command_permissions(hikari.Permissions.ADMINISTRATOR)
 @lightbulb.option("name", "Name of the event", required=True)
 @lightbulb.option("description", "Description of the event, markdown is fine to use!", required=True)
-@lightbulb.option("datetime", "Must be in the format: yyyy-mm-dd hh:mm 24 hour clock", required=True)
+@lightbulb.option("datetime", "Must be in the format: yyyy-mm-dd hh:mm 24 hour **UTC**", required=True)
 @lightbulb.option("author", "Name of the organiser for the event", required=False)
 @lightbulb.option("author_url", "The url for the organiser", required=False)
 @lightbulb.option("location", "Location of the event", required=False)
 @lightbulb.option("delta", "The number of minuets to make the announcement before the start time", required=False)
 @lightbulb.option("url", "The url for the event, default is the HackNotts schedule page", required=False)
-@lightbulb.option("colour", "The hex colour for the embed, default is HackNotts green '1BBB4F'", required=False)
+@lightbulb.option("colour", "The hex colour for the embed, default is 'F5F5DC'", required=False)
 @lightbulb.command("new_event", "Creates a new scheduled event embed", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def new_event(ctx: lightbulb.SlashContext) -> None:
@@ -199,7 +199,7 @@ async def new_event(ctx: lightbulb.SlashContext) -> None:
 
     if database_interaction(event=event):
         scheduler.add_job(post_event, 'date', run_date=event['Delta'], id=event['Name'], args=[event['Name']])
-        await ctx.respond(f"Event: **{event['Name']}** was added and will be announced at: {event['Delta']}")
+        await ctx.respond(f"Event: **{event['Name']}** was added and will be announced at: {event['Delta']} {scheduler.get_job(event['Name'])}")
     else:
         await ctx.respond(f"Event: **{event['Name']}** already exists!")
 
@@ -211,10 +211,10 @@ async def new_event(ctx: lightbulb.SlashContext) -> None:
 @lightbulb.option("author_url", "The url for the organiser", required=False)
 @lightbulb.option("description", "Description of the event, markdown is fine to use!", required=False)
 @lightbulb.option("location", "Location of the event", required=False)
-@lightbulb.option("datetime", "Must be in the format: yyyy-mm-dd hh:mm 24 hour clock", required=False)
+@lightbulb.option("datetime", "Must be in the format: yyyy-mm-dd hh:mm 24 hour **UTC**", required=False)
 @lightbulb.option("delta", "The number of minuets to make the announcement before the start time", required=False)
 @lightbulb.option("url", "The url for the event, default is the HackNotts schedual page", required=False)
-@lightbulb.option("colour", "The hex colour for the embed, default is HackNotts green '1BBB4F'", required=False)
+@lightbulb.option("colour", "The hex colour for the embed, default is 'F5F5DC'", required=False)
 @lightbulb.command("update_event", "Updates an event previously set, to clear a feild type a 0", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def update_event(ctx: lightbulb.SlashContext) -> None:
@@ -228,7 +228,7 @@ async def update_event(ctx: lightbulb.SlashContext) -> None:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts"
+        database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -341,7 +341,7 @@ async def list_past(ctx: lightbulb.SlashContext) -> None:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts"
+        database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -385,7 +385,7 @@ async def delete(ctx: lightbulb.SlashContext) -> None:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts"
+        database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -397,7 +397,7 @@ async def delete(ctx: lightbulb.SlashContext) -> None:
     if db_cursor.rowcount == 0:
         await ctx.respond(f"No event found with name **{ctx.options.name}**")
     else:
-        scheduler.remove_job(ctx.options.name)
+        flush()
         await ctx.respond(f"Event **{ctx.options.name}** has been deleted")
 
 @plugin.command

@@ -5,8 +5,8 @@ from flask import Flask, request, abort
 app = Flask(__name__)
 
 # This is reversed proxied by nginx, this is NOT the public address
-# This is the interal address localhost:5000/hacknotts2023 in this case
-@app.route('/hacknotts2023', methods=['POST', 'GET'])
+# This is the interal address localhost:6000/hacknotts in this case
+@app.route('/hacknotts', methods=['POST', 'GET'])
 def webhook():
     if request.method == 'POST':
         with open("./secrets/sqlserver_pass", "r") as file:
@@ -20,7 +20,7 @@ def webhook():
             host="localhost",
             user=sql_user,
             password=sql_pass,
-            database="HackNotts"
+            database="HackNotts2"
             )
             db_cursor = db.cursor()
         except mysql.connector.DatabaseError:
@@ -57,7 +57,7 @@ def webhook():
 
                 else:
                     try:
-                        discord_tag = data['responses']['what-is-your-discord-tag']
+                        discord_tag = data['responses']['discord-username']
                     except KeyError:
                         discord_tag = None
 
@@ -69,6 +69,7 @@ def webhook():
                         values = (discord_tag, ticket_ref, ticket_type)
 
                     try:
+                        print(sql)
                         db_cursor.execute(sql, values)
                         db.commit()
                     except mysql.connector.errors.IntegrityError: # Ticket has been transfered or tag updated
@@ -92,4 +93,4 @@ def webhook():
         abort(404)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=6000)
