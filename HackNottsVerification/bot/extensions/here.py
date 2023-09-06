@@ -8,7 +8,7 @@ plugin = lightbulb.Plugin("here", default_enabled_guilds=1147945134831440082)
 @lightbulb.command("here", "Use this to get the 'I was here' role!", auto_defer = True, ephemeral = True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def here(ctx: lightbulb.SlashContext):
-    role_id = 1058732186804695170
+    role_id = 1147945134831440084
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -19,11 +19,11 @@ async def here(ctx: lightbulb.SlashContext):
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts"
+        database="HackNotts2"
     )
     db_cursor = db.cursor(dictionary=True)
     sql = "SELECT * FROM `People` WHERE `DiscordTag` = %s"
-    db_cursor.execute(sql, (f"{ctx.user.username}#{ctx.user.discriminator}",))
+    db_cursor.execute(sql, (ctx.user.username,))
     try:
         result: dict = db_cursor.fetchall()[0]
     except IndexError:
@@ -34,8 +34,8 @@ async def here(ctx: lightbulb.SlashContext):
     if result['CheckedIn'] == 0:
         await ctx.respond("You have not checked in yet!")
     elif result['CheckedIn'] == 1:
-        await plugin.bot.rest.add_role_to_member(977197096094564453, ctx.user.id, role_id)
-        await ctx.respond("*You're in* <:software:1024699991933063190>")
+        await plugin.bot.rest.add_role_to_member(ctx.guild_id, ctx.user.id, role_id)
+        await ctx.respond("*You're in*")
     else:
         ctx.respond("An error occured! Try again later :smiley:")
 
