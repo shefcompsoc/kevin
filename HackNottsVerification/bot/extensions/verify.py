@@ -10,7 +10,8 @@ server_info = {
     'Hacker': 1147945134831440085,
     'Volunteer': 1147945134831440088,
     'Sponsor': 1147945134831440089,
-    'Organiser': 1147945134831440091
+    'Organiser': 1147945134831440091,
+    'Donor': 1147945134831440090
 } # Role ID's
 
 # Test Server
@@ -148,12 +149,14 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
             me = await event.app.rest.create_dm_channel(427401640061042689)
             await me.send(f"The user <@{event.user_id}> joined HackNotts server but was already verified")
 
-            message = f"Hello! Thank you for joining the HackNotts '23 Discord server. It appears that your Discord username is already verified on our database, this means you will not be able to send messages in the server. An organiser will be in contact shortly to resolve this issue :smile:"
+            message = f"Hello! Thank you for joining the HackNotts Discord server. It appears that your Discord username is already verified on our database, this means you will not be able to send messages in the server. An organiser will be in contact shortly to resolve this issue :smile:"
             logging.warning(f"User: {event.user.username} joined the server but was already verifed?")
         elif flag is False: # Autoverification worked
             message = f"Hello! This is an automatic notification to say you have been verified as **{ticket_type}** on the HackNotts Discord server. This is because you entered your Discord username when assigning your ticket. Please have a look around and introduce yourself!"
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info['verified'])   # adds verified role
-            await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info[ticket_type])  # adds either volunteer or attendee role
+            await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info[ticket_type])  # adds the specific role
+            if ticket_type == "Donor":
+                await event.app.rest.add_role_to_member(server_info["server_id"], event.user_id, server_info["Hacker"]) # adds hacker role if also doner
         elif flag is None: # Just a join
             return
 
@@ -196,7 +199,9 @@ async def verify_command(ctx: lightbulb.SlashContext) -> None:
         else:
             if message[2] is not None: # Is there a role to assign? if none then that means that the ticket ref was not found
                 await ctx.app.rest.add_role_to_member(server_info['server_id'], ctx.user.id, server_info['verified'])    # adds verified role
-                await ctx.app.rest.add_role_to_member(server_info['server_id'], ctx.user.id, server_info[message[2]])    # adds either volunteer or attendee role
+                await ctx.app.rest.add_role_to_member(server_info['server_id'], ctx.user.id, server_info[message[2]])    # adds specific role to user
+                if message[2] == "Donor":
+                    await ctx.app.rest.add_role_to_member(server_info["server_id"], ctx.user.id, server_info["Hacker"])  # adds hacker role if also doner
 
         await ctx.respond(message[0])
     else:
