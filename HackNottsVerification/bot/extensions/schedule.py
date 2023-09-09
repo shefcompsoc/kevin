@@ -41,7 +41,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
         url = result['URL']
 
     if result['Colour'] is None:
-        colour = "F5F5DC" # Default colour if none is given, hacknotts green
+        colour = "F5F5DC" # Default colour if none is given
     else:
         colour = result['Colour']
 
@@ -58,7 +58,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
         embed.set_author(name=result['Author'], url=result['AuthorURL'])
 
     embed.add_field(name="Description", value=result['Description'])
-    embed.set_footer(text="HackNotts 2023.5")
+    embed.set_footer(text="HackNotts 2023 ½")
 
     if not preview:
         # Set EventPassed to 1 to show the event has been posted
@@ -199,7 +199,7 @@ async def new_event(ctx: lightbulb.SlashContext) -> None:
 
     if database_interaction(event=event):
         scheduler.add_job(post_event, 'date', run_date=event['Delta'], id=event['Name'], args=[event['Name']])
-        await ctx.respond(f"Event: **{event['Name']}** was added and will be announced at: {event['Delta']} {scheduler.get_job(event['Name'])}")
+        await ctx.respond(f"Event: **{event['Name']}** was added and will be announced at: {event['Delta']}")
     else:
         await ctx.respond(f"Event: **{event['Name']}** already exists!")
 

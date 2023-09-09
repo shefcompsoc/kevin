@@ -23,7 +23,7 @@ server_info = {
 #     'Sponsor': 1026621003171897404
 # } # Role ID's
 
-def user_verify(user, ref: str):
+def user_verify(user, ID: int, ref: str):
     ref = ref.upper()
 
     with open("./secrets/sqlserver_pass", "r") as file:
@@ -42,7 +42,7 @@ def user_verify(user, ref: str):
 
         db_cursor = db.cursor()
     except mysql.connector.DatabaseError:
-        pass
+        return None
 
     sql = "SELECT `ID`, `DiscordTag`, `TicketType`, `Verified` FROM `People` WHERE `TicketRef` = %s"
     db_cursor.execute(sql, (ref,))
@@ -54,11 +54,11 @@ def user_verify(user, ref: str):
     flag = 0 # Have they tried using someone elses code
     verif = False
     if result is None: # There was no reference found
-        message = f"The ticket reference \'**{ref}**\' does not seem to be in our database. Please check you have entered it correctly. It should be 6 characters ***including*** the hyphen"
+        message = f"The ticket reference \'**{ref}**\' does not seem to be in our database. Please check you have entered it correctly. It should be 6 characters ***including*** the hyphen."
     elif result[3] == 1 and str(result[1]) == str(user): # The verified username is 1 and the discord usernames match
         message = f"You are already verified!"
     elif result[3] == 1: # Verified is 1 but discord usernames dont match
-        message = f"It appears that the ticket with reference \'**{ref}**\' is already registered with a user. A message has been automatically sent to an organiser who will contact you shortly to resolve this issue"
+        message = f"It appears that the ticket with reference \'**{ref}**\' is already registered with a user. A message has been automatically sent to an organiser who will contact you shortly to resolve this issue."
         flag = 1
     elif result[1] is not None: # There is something in the discord username
         if str(result[1]) == str(user): # Verified is not 1 and usernames match
@@ -71,15 +71,15 @@ def user_verify(user, ref: str):
 
     if verif is True: # Verify user and update record
         try:
-            sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s WHERE `ID` = %s" # Set user to be verified and set their username
-            db_cursor.execute(sql, (user, result[0]))
+            sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s, `DiscordID` = %s WHERE `ID` = %s" # Set user to be verified and set their username
+            db_cursor.execute(sql, (user, ID, result[0]))
             db.commit()
 
             logging.info(f"User '{user}' has been manually verified with reference \'{ref}\' as '{result[2]}'")
-            message = f"You have been verified with ticket type: **{result[2]}** and have accompanying role assigned to you. Thank you!"
+            message = f"You have been verified with ticket type: **{result[2]}** and have accompanying roles assigned to you. Thank you!"
 
         except mysql.connector.errors.IntegrityError: # Probably a discord username is in the database
-            message = f"Your Discord username is already assigned to a ticket reference. A message has been sent to an organiser and will be with you to resolve this issue"
+            message = f"Your Discord username is already assigned to a ticket reference. A message has been sent to an organiser and they will be in touch with you to resolve this issue."
             flag = 3
 
     db.close()
@@ -88,7 +88,7 @@ def user_verify(user, ref: str):
     except TypeError:
         return(message, flag, None)
 
-def auto_verify(tag):
+def auto_verify(tag: str, ID: int):
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -105,7 +105,7 @@ def auto_verify(tag):
 
         db_cursor = db.cursor()
     except mysql.connector.DatabaseError:
-        pass
+        return 0
 
     sql = "SELECT `ID`, `TicketRef`, `TicketType`, `Verified` FROM `People` WHERE `DiscordTag` = %s"
     db_cursor.execute(sql, (tag,))
@@ -123,8 +123,9 @@ def auto_verify(tag):
         flag = True
     else:
         _id = result[0]
-        sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s WHERE `ID` = %s" # Set user to be verified and set their tag
-        db_cursor.execute(sql, (tag, _id))
+        sql = "UPDATE `People` SET `Verified` = 1, `DiscordID` = %s WHERE `ID` = %s" # Set user to be verified and set their tag
+        #sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s WHERE `ID` = %s" why update discord tag?
+        db_cursor.execute(sql, (ID, _id))
         db.commit()
 
         logging.info(f"User: {tag} has been auto verified with ticket reference '{result[1]}' as '{result[2]}'")
@@ -140,19 +141,24 @@ plugin = lightbulb.Plugin("verify")
 async def on_join(event: hikari.MemberCreateEvent) -> None:
     if not event.member.is_bot and not event.member.is_system:
         logging.info(f"User: {event.user.username} joined the server")
-        result = auto_verify(str(event.user.username))
+        result = auto_verify(str(event.user.username), event.user.id)
 
+        if result == 0:
+            await event.app.rest.create_message(1150024069161435216, "Auto verify: The MySQL server is down <@427401640061042689>", user_mentions=True) # Send error in logs channel
+            return
+        
         flag = result[0]
         ticket_type = result[2]
 
         if flag is True: # User already registered
-            me = await event.app.rest.create_dm_channel(427401640061042689)
-            await me.send(f"The user <@{event.user_id}> joined HackNotts server but was already verified")
-
+            #me = await event.app.rest.create_dm_channel(427401640061042689)
+            #await me.send(f"The user <@{event.user_id}> joined HackNotts server but was already verified")
+            
             message = f"Hello! Thank you for joining the HackNotts Discord server. It appears that your Discord username is already verified on our database, this means you will not be able to send messages in the server. An organiser will be in contact shortly to resolve this issue :smile:"
+            await event.app.rest.create_message(1150024069161435216, f"User: {event.user.username} joined the server but was already verifed?")
             logging.warning(f"User: {event.user.username} joined the server but was already verifed?")
         elif flag is False: # Autoverification worked
-            message = f"Hello! This is an automatic notification to say you have been verified as **{ticket_type}** on the HackNotts Discord server. This is because you entered your Discord username when assigning your ticket. Please have a look around and introduce yourself!"
+            message = f"Hello! This is an automatic notification to say you have been verified as **{ticket_type}** on the HackNotts Discord server and have accompanying roles assigned to you. This is because you entered your Discord username when assigning your ticket. Please have a look around and introduce yourself!"
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info['verified'])   # adds verified role
             await event.app.rest.add_role_to_member(server_info['server_id'], event.user_id, server_info[ticket_type])  # adds the specific role
             if ticket_type == "Donor":
@@ -166,9 +172,12 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
                 await user.send(message)
             except hikari.ForbiddenError:
                 logging.info(f"Unable to send welcome message to user {event.user.username}")
+                await event.app.rest.create_message(1150024069161435216, f"Unable to send welcome message to user {event.user.username}")
         elif result[0] is None:
-            me = await event.app.rest.create_dm_channel(427401640061042689)
-            await me.send("Auto verify: The MySQL server is down")
+            #me = await event.app.rest.create_dm_channel(427401640061042689)
+            #await me.send("Auto verify: The MySQL server is down")
+
+            await event.app.rest.create_message(1150024069161435216, "Auto verify: The MySQL server is down <@427401640061042689>", user_mentions=True) # Send error in logs channel
     else:
         logging.info(f"Bot: {event.user.username} joined the server")
 
@@ -179,27 +188,30 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
 @lightbulb.implements(lightbulb.SlashCommand)
 async def verify_command(ctx: lightbulb.SlashContext) -> None:
     if re.search('^[-A-Za-z0-9]+$', ctx.options.ticket) is not None:
-        message = user_verify(ctx.author.username, ctx.options.ticket) # Returns the response and flag
+        message = user_verify(ctx.author.username, ctx.author.id, ctx.options.ticket) # Returns the response and flag
 
         error = None
         if message is None:
-            error = "Manual verify: The MySQL server is down"
+            error = "Manual verify: The MySQL server is down <@427401640061042689>"
             message = ("An internal error has occured. Please try again in a few minutes", None)
         elif message[1] == 1: # The verified flag is true
             error = f"The user <@{ctx.author.id}> tried verifying with ticket reference '{ctx.options.ticket.upper()}' but it is already verified"
         elif message[1] == 2: # They used one with a discord username already filled in but isnt verified
             error = f"The user <@{ctx.author.id}> tried verifying with ticket reference '{ctx.options.ticket.upper()}' but the discord usernames did not match"
-        elif message[1] == 3:
-            error = f"The user <@{ctx.author.id}> tried verifying with ticket reference '{ctx.options.ticket.upper()}' but their discord usernames is already registered to a ticket reference"
+        elif message[1] == 3: # Discord username is already linked to a ticket (probably a duped ticket)
+            error = f"The user <@{ctx.author.id}> tried verifying with ticket reference '{ctx.options.ticket.upper()}' but their discord usernames is already registered to a ticket reference"            
 
         if error is not None: # Is there an error?
             logging.warning(error)
-            me = await ctx.bot.rest.create_dm_channel(427401640061042689)
-            await me.send(error) # Send me an error via a DM
+            #me = await ctx.bot.rest.create_dm_channel(427401640061042689)
+            #await me.send(error) # Send me an error via a DM
+            
+            await ctx.bot.rest.create_message(1150024069161435216, error, user_mentions=True) # Send error in logs channel
         else:
             if message[2] is not None: # Is there a role to assign? if none then that means that the ticket ref was not found
                 await ctx.app.rest.add_role_to_member(server_info['server_id'], ctx.user.id, server_info['verified'])    # adds verified role
                 await ctx.app.rest.add_role_to_member(server_info['server_id'], ctx.user.id, server_info[message[2]])    # adds specific role to user
+
                 if message[2] == "Donor":
                     await ctx.app.rest.add_role_to_member(server_info["server_id"], ctx.user.id, server_info["Hacker"])  # adds hacker role if also doner
 
