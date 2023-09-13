@@ -16,15 +16,6 @@ server_info = {
     'logs': 1150024069161435216
 } # Role ID's
 
-# Test Server
-# server_info = {
-#     'server_id': 1023695785495363584,
-#     'verified': 1025399005477343323,
-#     'Attendee': 1025399116706095198,
-#     'Volunteer': 1025896388048977921,
-#     'Sponsor': 1026621003171897404
-# } # Role ID's
-
 async def user_verify(user, ID: int, ref: str):
     ref = ref.upper()
 
@@ -50,7 +41,7 @@ async def user_verify(user, ID: int, ref: str):
     db_cursor.execute(sql, (ref,))
     try:
         result = db_cursor.fetchall()[0]
-    except IndexError:
+    except IndexError: # The ticket reference could not be found in the database
         result = None
 
     flag = 0 # Have they tried using someone elses code
@@ -131,7 +122,6 @@ async def auto_verify(tag: str, ID: int):
         _id = result[0]
         _type = str(result[2])
         sql = "UPDATE `People` SET `Verified` = 1, `DiscordID` = %s WHERE `ID` = %s" # Set user to be verified and set their tag
-        #sql = "UPDATE `People` SET `Verified` = 1, `DiscordTag` = %s WHERE `ID` = %s" why update discord tag?
         db_cursor.execute(sql, (ID, _id)) # ID = Dsicord ID, _id = database ID
         db.commit()
 
@@ -160,8 +150,6 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
         ticket_type = result[2]
 
         if flag is True: # User already registered
-            #me = await event.app.rest.create_dm_channel(427401640061042689)
-            #await me.send(f"The user <@{event.user_id}> joined HackNotts server but was already verified")
             
             message = f"Hello! Thank you for joining the HackNotts Discord server. It appears that your Discord username is already verified on our database, this means you will not be able to send messages in the server for the time being. An organiser will be in contact shortly to resolve this issue :smile:"
             await event.app.rest.create_message(server_info['logs'], f"User: <@{event.user.id}> joined the server but was already verifed?")
@@ -183,8 +171,6 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
                 logging.info(f"Unable to send welcome message to user {event.user.username}")
                 await event.app.rest.create_message(server_info['logs'], f"Unable to send welcome message to user <@{event.user.id}>")
         elif result[0] is None:
-            #me = await event.app.rest.create_dm_channel(427401640061042689)
-            #await me.send("Auto verify: The MySQL server is down")
 
             await event.app.rest.create_message(server_info['logs'], "Auto verify: The MySQL server is down <@427401640061042689>", user_mentions=True) # Send error in logs channel
     else:
@@ -194,7 +180,7 @@ async def on_join(event: hikari.MemberCreateEvent) -> None:
 @plugin.command
 @lightbulb.add_checks(lightbulb.human_only)
 @lightbulb.option("ticket", "Your 6 character ticket ID \"1234-5\", case insensitive")
-@lightbulb.command("verify", "This is used to manually verify yourself, if auto verification doesn't work", auto_defer=True, ephemeral=True)
+@lightbulb.command("verify", "This is used to manually verify yourself", auto_defer=True, ephemeral=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def verify_command(ctx: lightbulb.SlashContext) -> None:
     if re.search('^[-A-Za-z0-9]+$', ctx.options.ticket) is not None:

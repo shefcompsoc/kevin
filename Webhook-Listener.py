@@ -1,5 +1,5 @@
 # Tito webhook server
-import mysql.connector, hmac, hashlib, base64
+import mysql.connector, hmac, hashlib, base64, re
 from flask import Flask, request, abort
 
 app = Flask(__name__)
@@ -58,6 +58,8 @@ def webhook():
                 else:
                     try:
                         discord_tag = data['responses']['discord-username']
+                        if re.search('#', discord_tag) is not None:
+                            discord_tag = None # This is the old one and will break the bot. Set to null, the user will have to /verify
                     except KeyError:
                         discord_tag = None
 
