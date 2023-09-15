@@ -62,11 +62,11 @@ class Bot(lightbulb.BotApp):
         try:
             if event.channel_id == channel_id and event.author_id != 427401640061042689: # Is it not me?
                 logging.info(f"Deleted message in verify channel: '{event.message.content}'")
-                await self.rest.delete_message(channel_id, event.message_id) 
+                await self.rest.delete_message(channel_id, event.message_id)
                 user = await self.rest.create_dm_channel(event.member.id)
                 await user.send("You cannot send normal messages in the verify channel. It is for verify commands only")
                 await user.send(f"The message: '{event.message.content}' was automatically deleted")
-        except TypeError:
+        except (TypeError, hikari.BadRequestError):
             pass
 
     async def on_leave(self, event:hikari.MemberDeleteEvent) -> None:
