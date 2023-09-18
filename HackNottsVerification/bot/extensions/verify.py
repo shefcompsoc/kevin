@@ -219,10 +219,11 @@ async def verify_command(ctx: lightbulb.SlashContext) -> None:
 @plugin.command
 @lightbulb.app_command_permissions(hikari.Permissions.ADMINISTRATOR)
 @lightbulb.option("username", "The username to be verified", required=True)
+@lightbulb.option("identification", "The ID to be verified", required=True)
 @lightbulb.command("verify_user", "Autoverify a user", auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def verify_user(ctx: lightbulb.SlashContext) -> None:
-    result = auto_verify(ctx.options.username)
+    result = auto_verify(ctx.options.username, ctx.options.identification)
     await ctx.respond(result)
 
 
