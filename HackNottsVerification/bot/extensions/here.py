@@ -1,4 +1,4 @@
-import hikari, lightbulb, logging, asyncio, json, mysql.connector
+import lightbulb, logging, asyncio, json, mysql.connector
 
 from HackNottsVerification.bot import Bot
 
