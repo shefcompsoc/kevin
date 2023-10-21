@@ -36,7 +36,7 @@ async def here(ctx: lightbulb.SlashContext):
     try:
         result: dict = db_cursor.fetchall()[0]
     except IndexError:
-        await ctx.respond("You are not in the database")
+        await ctx.respond("You are not in the database. An organiser will be in touch with you shortly")
         await ctx.app.rest.create_message(server_info['logs'], f"<@{ctx.user.id}> used `/here` but is not in the database")
         return
     db.close()

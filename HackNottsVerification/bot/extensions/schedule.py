@@ -48,7 +48,8 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
     embed = hikari.Embed(
         title=result['Name'],
         url=url,
-        colour=colour, # Default hacknotts 23 green
+        colour=colour, # Default hacknotts 
+        description=result['Description'],
         timestamp=result['StartTime'].astimezone(timezone.utc),
     )
 
@@ -57,7 +58,6 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
     if result['Author'] is not None:
         embed.set_author(name=result['Author'], url=result['AuthorURL'])
 
-    embed.add_field(name="Description", value=result['Description'])
     embed.set_footer(text="HackNotts 2023 ½")
 
     if not preview:
@@ -66,7 +66,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
         db_cursor.execute(sql, (id,))
         db.commit()
         # Ping everone outside of the embed, you cannot ping roles inside of the embed!
-        await plugin.bot.rest.create_message(channel=channel_id, content="<@&1147945134831440085> <@&1147945134831440088>", mentions_everyone=True, user_mentions=True, role_mentions=True)
+        await plugin.bot.rest.create_message(channel=channel_id, content="<@&1147945134831440085>", mentions_everyone=True, user_mentions=True, role_mentions=True)
 
     await plugin.bot.rest.create_message(channel=channel_id, embed=embed)
     db.close()
