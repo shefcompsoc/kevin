@@ -58,7 +58,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
     if result['Author'] is not None:
         embed.set_author(name=result['Author'], url=result['AuthorURL'])
 
-    embed.set_footer(text="HackNotts 2023 ½")
+    embed.set_footer(text="HackNotts 1984")
 
     if not preview:
         # Set EventPassed to 1 to show the event has been posted
