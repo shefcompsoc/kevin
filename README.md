@@ -35,4 +35,4 @@ An announcement will be made as an embed tagging the relevant roles, all data is
 You must have VS C++ build tools installed
 
 **Other dependencies:**
-* *MySQL to store tito tickets and user info*
+* *MySQL* - to store tito tickets and user info
