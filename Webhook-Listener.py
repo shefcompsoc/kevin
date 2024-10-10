@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # This is reversed proxied by nginx, this is NOT the public address
 # This is the interal address localhost:5001/hacknotts in this case
-@app.route('/hacknotts', methods=['POST', 'GET'])
+@app.route('/hacknottsmTZ6VMWZWgqHXqRjLL2xSwR0MOJnfMl', methods=['POST', 'GET'])
 def webhook():
     if request.method == 'POST':
         with open("./secrets/sqlserver_pass", "r") as file:
@@ -20,7 +20,7 @@ def webhook():
             host="localhost",
             user=sql_user,
             password=sql_pass,
-            database="HackNotts2"
+            database="HackNotts3"
             )
             db_cursor = db.cursor()
         except mysql.connector.DatabaseError:
@@ -57,7 +57,7 @@ def webhook():
 
                 else:
                     try:
-                        discord_tag = data['responses']['discord-username']
+                        discord_tag = data['responses']['what-is-your-discord-username']
                         if re.search('#', discord_tag) is not None:
                             discord_tag = None # This is the old one and will break the bot. Set to null, the user will have to /verify
                     except KeyError:
@@ -71,7 +71,6 @@ def webhook():
                         values = (discord_tag, ticket_ref, ticket_type)
 
                     try:
-                        print(sql)
                         db_cursor.execute(sql, values)
                         db.commit()
                     except mysql.connector.errors.IntegrityError: # Ticket has been transfered or tag updated

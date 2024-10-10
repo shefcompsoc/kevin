@@ -4,16 +4,15 @@ from HackNottsVerification.bot import Bot
 
 # HackNotts Server
 server_info = {
-    'server_id': 1147945134831440082,
-    'verified': 1147945134831440083,
-    'Attendee': 1147945134831440085,
-    'Hacker': 1147945134831440085,
-    'Volunteer': 1147945134831440088,
-    'Sponsor': 1147945134831440089,
-    'Organiser': 1147945134831440091,
-    'Donor': 1147945134831440090,
-    'Here': 1147945134831440084,
-    'logs': 1150024069161435216
+    'server_id': 1257068902773559326,
+    'verified': 1293626063045525596,
+    'Attendee': 1286310578142445639,
+    'Hacker': 1286310578142445639,
+    'Volunteer': 1257069700207087727,
+    'Sponsor': 1286316167937396850,
+    'Organiser': 1257069655722299422,
+    'Here': 1293625793754435584,
+    'logs': 1293625679413383308
 } # Role ID's
 
 async def user_verify(user, ID: int, ref: str):
@@ -30,7 +29,7 @@ async def user_verify(user, ID: int, ref: str):
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
         )
 
         db_cursor = db.cursor()
@@ -97,7 +96,7 @@ async def auto_verify(tag: str, ID: int):
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
         )
 
         db_cursor = db.cursor()

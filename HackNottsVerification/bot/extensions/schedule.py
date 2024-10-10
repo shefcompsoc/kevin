@@ -4,14 +4,14 @@ from HackNottsVerification.bot import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta, timezone
 
-plugin = lightbulb.Plugin("schedule", default_enabled_guilds=1147945134831440082)
+plugin = lightbulb.Plugin("schedule", default_enabled_guilds=1257068902773559326)
 
 # Scheduler set up, timezone is London
 scheduler = AsyncIOScheduler() # Has to be async for the bot
 scheduler.configure(timezone=timezone.utc)
 scheduler.start()
 
-async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bool = False) -> bool:
+async def post_event(id: str, channel_id: int = 1286308553606299658, preview: bool = False) -> bool:
     with open("./secrets/sqlserver_pass", "r") as file:
         sql_pass = file.read().strip()
 
@@ -22,7 +22,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
     host="localhost",
     user=sql_user,
     password=sql_pass,
-    database="HackNotts2"
+    database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -36,12 +36,12 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
         return False # The ID was not found
 
     if result['URL'] is None:
-        url = "https://www.hacknotts.com/schedule/" # Default URL if none is give
+        url = "https://www.hacknotts.com/" # Default URL if none is give
     else:
         url = result['URL']
 
     if result['Colour'] is None:
-        colour = "F5F5DC" # Default colour if none is given
+        colour = "FD7801" # Default colour if none is given
     else:
         colour = result['Colour']
 
@@ -58,7 +58,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
     if result['Author'] is not None:
         embed.set_author(name=result['Author'], url=result['AuthorURL'])
 
-    embed.set_footer(text="HackNotts 1984")
+    embed.set_footer(text="HackNotts 2024")
 
     if not preview:
         # Set EventPassed to 1 to show the event has been posted
@@ -66,7 +66,7 @@ async def post_event(id: str, channel_id: int = 1148348825153572874, preview: bo
         db_cursor.execute(sql, (id,))
         db.commit()
         # Ping everone outside of the embed, you cannot ping roles inside of the embed!
-        await plugin.bot.rest.create_message(channel=channel_id, content="<@&1147945134831440085>", mentions_everyone=True, user_mentions=True, role_mentions=True)
+        await plugin.bot.rest.create_message(channel=channel_id, content="<@&1286310578142445639>", mentions_everyone=True, user_mentions=True, role_mentions=True)
 
     await plugin.bot.rest.create_message(channel=channel_id, embed=embed)
     db.close()
@@ -83,7 +83,7 @@ def database_interaction(event, mode="insert", old_name=None) -> bool:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -118,7 +118,7 @@ def flush() -> list:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
     sql = "SELECT `Name`, `Delta` FROM `Schedule` WHERE `EventPassed` = 0"
@@ -228,7 +228,7 @@ async def update_event(ctx: lightbulb.SlashContext) -> None:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -341,7 +341,7 @@ async def list_past(ctx: lightbulb.SlashContext) -> None:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
 
@@ -385,7 +385,7 @@ async def delete(ctx: lightbulb.SlashContext) -> None:
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
 

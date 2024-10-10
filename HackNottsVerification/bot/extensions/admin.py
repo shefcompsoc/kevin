@@ -2,7 +2,7 @@ import hikari, lightbulb
 
 from HackNottsVerification.bot import Bot
 
-plugin = lightbulb.Plugin("admin", default_enabled_guilds=1147945134831440082)
+plugin = lightbulb.Plugin("admin", default_enabled_guilds=1257068902773559326)
 
 @plugin.command
 @lightbulb.app_command_permissions(hikari.Permissions.ADMINISTRATOR)

@@ -3,9 +3,9 @@ import lightbulb, logging, asyncio, json, mysql.connector
 from HackNottsVerification.bot import Bot
 
 server_info = {
-    'server_id': 1147945134831440082,
-    'here_role': 1147945134831440084,
-    'logs': 1150024069161435216
+    'server_id': 1257068902773559326,
+    'here_role': 1293625793754435584,
+    'logs': 1293625679413383308
 }
 
 plugin = lightbulb.Plugin("here", default_enabled_guilds=server_info['server_id'])
@@ -28,7 +28,7 @@ async def here(ctx: lightbulb.SlashContext):
         host="localhost",
         user=sql_user,
         password=sql_pass,
-        database="HackNotts2"
+        database="HackNotts3"
     )
     db_cursor = db.cursor(dictionary=True)
     sql = "SELECT * FROM `People` WHERE `DiscordTag` = %s"
