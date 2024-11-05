@@ -6,6 +6,7 @@ class Environment:
         self.DISCORD_TOKEN: str = environ.get("DISCORD_TOKEN", "")
         self.DISCORD_ATTENDEE_ROLE_ID: int = int(environ.get("DISCORD_ATTENDEE_ROLE_ID", ""))
         self.DISCORD_ORGANISER_ROLE_ID: int = int(environ.get("DISCORD_ORGANISER_ROLE_ID", ""))
+        self.DISCORD_VOLUNTEER_ROLE_ID: int = int(environ.get("DISCORD_VOLUNTEER_ROLE_ID", ""))
         self.DISCORD_GUILD_ID: int = int(environ.get("DISCORD_GUILD_ID", ""))
         self.TITO_TOKEN: str = environ.get("TITO_API_KEY", "")
         self.TITO_ACCOUNT_SLUG: str = environ.get("TITO_ACCOUNT_SLUG", "")
