@@ -16,7 +16,7 @@ class TitoAPI:
         }
 
     async def fetch_question_answers(self, question_slug: str) -> list[dict]:
-        endpoint = f"{self.url_base}/questions/{question_slug}/answers"
+        endpoint = f"{self.url_base}/questions/{question_slug}/answers?page[size]=1000"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(endpoint, headers=self.base_headers) as response:
