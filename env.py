@@ -12,7 +12,6 @@ class Environment:
         self.TITO_ACCOUNT_SLUG: str = environ.get("TITO_ACCOUNT_SLUG", "")
         self.TITO_EVENT_SLUG: str = environ.get("TITO_EVENT_SLUG", "")
         self.TITO_QUESTION_SLUG: str = environ.get("TITO_QUESTION_SLUG", "")
-        self.ENABLED_EXTENSIONS: list = environ.get("ENABLED_EXTENSIONS", "").split(",")
 
 
 env = Environment()
