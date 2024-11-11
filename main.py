@@ -7,7 +7,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s: %(message)s",
     datefmt="%d-%m-%Y %H:%M:%S", 
     encoding="utf-8", 
-    level=logging.DEBUG)
+    level=logging.INFO)
 
 intents = discord.Intents.default()
 intents.members = True
