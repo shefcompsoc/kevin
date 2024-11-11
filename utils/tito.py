@@ -1,4 +1,4 @@
-import aiohttp
+import aiohttp, logging
 
 TITO_API_ROOT = "https://api.tito.io/v3"
 
@@ -21,6 +21,7 @@ class TitoAPI:
         async with aiohttp.ClientSession() as session:
             async with session.get(endpoint, headers=self.base_headers) as response:
                 answers = await response.json()
+                logging.debug(answers)
                 return [TitoAnswer.from_json(a) for a in answers.get("answers", [])]
 
 
