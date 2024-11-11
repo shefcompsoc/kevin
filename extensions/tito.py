@@ -1,4 +1,4 @@
-import aiohttp, discord, logging, utils
+import discord, json, logging, utils
 
 from discord.ext import commands, tasks
 from env import env
@@ -20,7 +20,9 @@ class Tito(commands.Cog):
     @tasks.loop(seconds=60.0)
     async def pull_answers(self):
         answers = await self.api.fetch_question_answers(env.TITO_QUESTION_SLUG)
+        logging.debug(f"Received {len(answers)} answers in latest API response.")
         for a in answers:
+            logging.debug(f"Stored answer for {a.response}")
             self.attendees[a.response] = a.ticket_id
 
     # TODO: allow to be used as user command
@@ -63,16 +65,35 @@ class Tito(commands.Cog):
         
         await ctx.respond(f"ℹ️ I found a ticket for `{user.name}`. Their ticket ID is `{ticket}`.", ephemeral=True)
 
+    @commands.slash_command(description="A debug command to get the internal cache.")
+    @commands.guild_only()
+    async def tickets(self, ctx: discord.ApplicationContext):
+        # Normal users can't do this
+        if not utils.is_volunteer(ctx.author):
+            logging.warning(f"User {ctx.author.name} attempted to user a forbidden command.")
+            return await ctx.respond("✋ Only organisers can do this.", ephemeral=True)
+
+        tickets = json.dumps(
+            self.attendees,
+            sort_keys=True,
+            indent=4,
+            separators=(',', ': ')
+        )
+        await ctx.respond(f"```json\n{tickets}\n```", ephemeral=True)
+
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         if member.guild.id != env.DISCORD_GUILD_ID:
+            logging.debug(f"Skipping automatic verification for {member.name} because they joined a different guild.")
             return
         
         if member.bot:
+            logging.debug(f"Skipping automatic verification for {member.name} because they are a bot.")
             return
         
         ticket = self.attendees.get(member.name)
         if ticket is None:
+            logging.debug(f"Skipping automatic verification for {member.name} because no ticket was found in cache.")
             return
         
         await member.add_roles(member.guild.get_role(env.DISCORD_ATTENDEE_ROLE_ID))
