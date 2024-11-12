@@ -23,7 +23,7 @@ class Tito(commands.Cog):
         logging.debug(f"Received {len(answers)} answers in latest API response.")
         for a in answers:
             logging.debug(f"Stored answer for {a.response}")
-            self.attendees[a.response] = a.ticket_id
+            self.attendees[a.response.lower()] = a.ticket_id
 
     # TODO: allow to be used as user command
     @commands.slash_command(description="Checks if the user has a ticket and gives them the attendee role if they do.")
@@ -38,7 +38,7 @@ class Tito(commands.Cog):
             
         # Check for a ticket in the cache
         user = user or ctx.author
-        ticket = self.attendees.get(user.name)
+        ticket = self.attendees.get(user.name.lower())
         if ticket is None:
             # TODO: maybe query the API directly?
             logging.warning(f"Attempted to verify user {user.name} but could not find a valid ticket.")
@@ -58,28 +58,12 @@ class Tito(commands.Cog):
             logging.warning(f"User {ctx.author.name} attempted to user a forbidden command.")
             return await ctx.respond("✋ Only organisers can do this.", ephemeral=True)
 
-        ticket = self.attendees.get(user.name)
+        ticket = self.attendees.get(user.name.lower())
         if ticket is None:
             # TODO: maybe query the API directly?
             return await ctx.respond(f"🤔 Sorry, I can't find a ticket for `{user.name}`. If one was bought recently, please wait a bit and then try again.", ephemeral=True)
         
         await ctx.respond(f"ℹ️ I found a ticket for `{user.name}`. Their ticket ID is `{ticket}`.", ephemeral=True)
-
-    @commands.slash_command(description="A debug command to get the internal cache.")
-    @commands.guild_only()
-    async def tickets(self, ctx: discord.ApplicationContext):
-        # Normal users can't do this
-        if not utils.is_volunteer(ctx.author):
-            logging.warning(f"User {ctx.author.name} attempted to user a forbidden command.")
-            return await ctx.respond("✋ Only organisers can do this.", ephemeral=True)
-
-        tickets = json.dumps(
-            self.attendees,
-            sort_keys=True,
-            indent=4,
-            separators=(',', ': ')
-        )
-        await ctx.respond(f"```json\n{tickets}\n```", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
@@ -91,7 +75,7 @@ class Tito(commands.Cog):
             logging.debug(f"Skipping automatic verification for {member.name} because they are a bot.")
             return
         
-        ticket = self.attendees.get(member.name)
+        ticket = self.attendees.get(member.name.lower())
         if ticket is None:
             logging.debug(f"Skipping automatic verification for {member.name} because no ticket was found in cache.")
             return
